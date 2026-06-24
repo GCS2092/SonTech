@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ShoppingBag, Heart, Star, ChevronLeft, Minus, Plus, MessageCircle, ShieldCheck, Truck } from 'lucide-react';
+import { ShoppingBag, Heart, Star, ChevronLeft, Minus, Plus, MessageCircle, ShieldCheck, Truck, Zap, Package } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Thumbs } from 'swiper/modules';
 import { productsApi } from '../../api/products.api';
@@ -41,7 +41,7 @@ function PreorderButton({ product, whatsappNumber }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-green-500 hover:bg-green-600 active:scale-95 text-white font-semibold text-sm transition-all duration-200 shadow-sm shadow-green-200"
+      className="flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold text-sm transition-all shadow-lg shadow-[#25D366]/20 active:scale-95"
     >
       <MessageCircle size={18} />
       Précommander via WhatsApp
@@ -152,9 +152,7 @@ export default function ProductDetail() {
     const colorImgs = allImages.filter((img) => img.color === color);
     if (colorImgs.length === 0) return;
     setTimeout(() => {
-      if (mainSwiperRef.current) {
-        mainSwiperRef.current.slideTo(0);
-      }
+      if (mainSwiperRef.current) mainSwiperRef.current.slideTo(0);
     }, 50);
   };
 
@@ -187,11 +185,20 @@ export default function ProductDetail() {
     }
   };
 
-  if (isLoading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>;
-  if (!product) return <div className="text-center py-24 text-stone-400">Produit introuvable</div>;
+  if (isLoading) return (
+    <div className="min-h-screen bg-slate-950 flex justify-center items-center">
+      <Spinner size="lg" />
+    </div>
+  );
+  if (!product) return (
+    <div className="min-h-screen bg-slate-950 text-center py-24 text-slate-500">Produit introuvable</div>
+  );
 
   const hasDiscount = product.comparePrice && product.comparePrice > product.price;
   const hasVariants = product.variants && product.variants.length > 0;
+  const discountPercent = hasDiscount
+    ? Math.round((1 - product.price / product.comparePrice) * 100)
+    : 0;
 
   const ColorSection = ({ showLabel = true }) => {
     const list = displayMode === 'SIZE_FIRST' ? colorsForSize : colors;
@@ -199,8 +206,8 @@ export default function ProductDetail() {
     return (
       <div>
         {showLabel && (
-          <p className="text-sm font-medium text-stone-700 mb-2">
-            Couleur{selectedColor && <span className="ml-2 text-stone-600 font-semibold">{selectedColor}</span>}
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2.5">
+            Couleur{selectedColor && <span className="ml-2 text-slate-200 font-semibold normal-case tracking-normal">{selectedColor}</span>}
           </p>
         )}
         <div className="flex gap-2 flex-wrap">
@@ -217,29 +224,31 @@ export default function ProductDetail() {
                 onClick={() => handleSelectColor(color)}
                 disabled={!colorHasStock}
                 title={color}
-                className={`relative flex flex-col items-center gap-1 transition-all ${!colorHasStock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                className={`relative flex flex-col items-center gap-1 transition-all ${!colorHasStock ? 'opacity-30 cursor-not-allowed' : ''}`}
               >
                 {previewImg ? (
                   <span className={`block w-12 h-12 rounded-xl overflow-hidden border-2 transition-all ${
-                    selectedColor === color ? 'border-stone-900 scale-105 shadow-md' : 'border-stone-200 hover:border-stone-400'
+                    selectedColor === color
+                      ? 'border-blue-500 scale-105 shadow-lg shadow-blue-500/30'
+                      : 'border-slate-700 hover:border-slate-500'
                   }`}>
                     <img src={previewImg.url} alt={color} className="w-full h-full object-cover" />
                     {!colorHasStock && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
-                        <span className="block w-8 h-0.5 bg-stone-400 rotate-45" />
+                      <span className="absolute inset-0 flex items-center justify-center bg-slate-900/60 rounded-xl">
+                        <span className="block w-8 h-0.5 bg-slate-400 rotate-45" />
                       </span>
                     )}
                   </span>
                 ) : (
-                  <span className={`px-3 py-1.5 rounded-xl border text-sm font-medium min-h-[44px] flex items-center ${
+                  <span className={`px-3 py-1.5 rounded-xl border text-sm font-medium min-h-[44px] flex items-center transition-all ${
                     selectedColor === color
-                      ? 'bg-stone-900 text-white border-stone-900'
-                      : 'border-stone-200 text-stone-600 hover:border-stone-400'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/30'
+                      : 'border-slate-700 text-slate-300 hover:border-slate-500'
                   } ${!colorHasStock ? 'line-through' : ''}`}>
                     {color}
                   </span>
                 )}
-                <span className="text-[10px] text-stone-500 leading-none">{color}</span>
+                <span className="text-[10px] text-slate-500 leading-none">{color}</span>
               </button>
             );
           })}
@@ -253,8 +262,8 @@ export default function ProductDetail() {
     if (list.length === 0) return null;
     return (
       <div>
-        <p className="text-sm font-medium text-stone-700 mb-2">
-          Taille{selectedSize && <span className="ml-2 text-stone-600 font-semibold">{selectedSize}</span>}
+        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2.5">
+          Taille{selectedSize && <span className="ml-2 text-slate-200 font-semibold normal-case tracking-normal">{selectedSize}</span>}
         </p>
         <div className="flex gap-2 flex-wrap">
           {list.map((size) => {
@@ -268,12 +277,12 @@ export default function ProductDetail() {
                 key={size}
                 onClick={() => handleSelectSize(size)}
                 disabled={!sizeHasStock}
-                className={`px-3 py-1.5 rounded-xl border text-sm font-medium transition-colors min-h-[44px] min-w-[44px] ${
+                className={`px-3 py-1.5 rounded-xl border text-sm font-medium transition-all min-h-[44px] min-w-[44px] ${
                   selectedSize === size
-                    ? 'bg-stone-900 text-white border-stone-900'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/30'
                     : !sizeHasStock
-                    ? 'border-stone-100 text-stone-300 cursor-not-allowed line-through'
-                    : 'border-stone-200 text-stone-600 hover:border-stone-400'
+                    ? 'border-slate-800 text-slate-600 cursor-not-allowed line-through'
+                    : 'border-slate-700 text-slate-300 hover:border-slate-500'
                 }`}
               >
                 {size}
@@ -286,239 +295,269 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Link
-        to="/products"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-800 hover:bg-stone-100 px-3 py-1.5 rounded-lg transition-colors mb-6"
-      >
-        <ChevronLeft size={16} />
-        Retour à la boutique
-      </Link>
+    <div className="min-h-screen bg-slate-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
+        <Link
+          to="/products"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-blue-400 px-3 py-1.5 rounded-lg transition-colors mb-8 group"
+        >
+          <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+          Retour à la boutique
+        </Link>
 
-        {/* Images */}
-        <div className="space-y-3">
-          <Swiper
-            key={selectedColor || 'default'}
-            modules={[Navigation, Thumbs]}
-            thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
-            navigation
-            loop={displayImages.length > 1}
-            onSwiper={(s) => { mainSwiperRef.current = s; }}
-            onSlideChange={(s) => setMainImg(s.realIndex)}
-            className="aspect-square bg-stone-100 rounded-2xl overflow-hidden relative"
-          >
-            {displayImages.length ? displayImages.map((img, i) => (
-              <SwiperSlide key={img.id || i}>
-                <img
-                  src={img.url}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                />
-              </SwiperSlide>
-            )) : (
-              <SwiperSlide>
-                <div className="w-full h-full flex items-center justify-center text-6xl">🛍️</div>
-              </SwiperSlide>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+
+          {/* Images */}
+          <div className="space-y-3">
+            <div className="relative">
+              <Swiper
+                key={selectedColor || 'default'}
+                modules={[Navigation, Thumbs]}
+                thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
+                navigation
+                loop={displayImages.length > 1}
+                onSwiper={(s) => { mainSwiperRef.current = s; }}
+                onSlideChange={(s) => setMainImg(s.realIndex)}
+                className="aspect-square bg-slate-900 rounded-2xl overflow-hidden border border-slate-800"
+              >
+                {displayImages.length ? displayImages.map((img, i) => (
+                  <SwiperSlide key={img.id || i}>
+                    <img
+                      src={img.url}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                    />
+                  </SwiperSlide>
+                )) : (
+                  <SwiperSlide>
+                    <div className="w-full h-full flex items-center justify-center text-6xl text-slate-700">
+                      <Package size={64} />
+                    </div>
+                  </SwiperSlide>
+                )}
+
+                {isOutOfStock && (
+                  <div className="absolute top-3 left-3 z-10 bg-red-500/90 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+                    Rupture de stock
+                  </div>
+                )}
+                {hasDiscount && !isOutOfStock && (
+                  <div className="absolute top-3 left-3 z-10 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+                    -{discountPercent}%
+                  </div>
+                )}
+              </Swiper>
+            </div>
+
+            {displayImages.length > 1 && (
+              <Swiper
+                key={`thumbs-${selectedColor || 'default'}`}
+                modules={[Thumbs]}
+                onSwiper={setThumbsSwiper}
+                slidesPerView={4}
+                spaceBetween={8}
+                watchSlidesProgress
+                className="w-full"
+              >
+                {displayImages.map((img, i) => (
+                  <SwiperSlide key={img.id || i}>
+                    <button className={`w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                      i === mainImg
+                        ? 'border-blue-500 shadow-md shadow-blue-500/20'
+                        : 'border-slate-800 hover:border-slate-600'
+                    }`}>
+                      <img src={img.url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    </button>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             )}
-            {isOutOfStock && (
-              <div className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                Rupture de stock
+          </div>
+
+          {/* Product info */}
+          <div className="space-y-5 pb-36 md:pb-0">
+            <div>
+              {product.category?.name && (
+                <span className="text-xs font-medium text-blue-400 uppercase tracking-widest">
+                  {product.category.name}
+                </span>
+              )}
+              <h1 className="text-2xl font-bold text-slate-100 mt-1 leading-tight">{product.name}</h1>
+
+              {avgRating && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <Star
+                        key={i}
+                        size={13}
+                        className={i < Math.round(avgRating) ? 'fill-amber-400 text-amber-400' : 'text-slate-700'}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-slate-500">{avgRating} · {reviews.length} avis</span>
+                </div>
+              )}
+            </div>
+
+            {/* Price */}
+            <div className="flex items-center gap-3">
+              <span className="text-3xl font-bold text-blue-400 font-mono">{formatPrice(product.price)}</span>
+              {hasDiscount && (
+                <>
+                  <span className="text-lg text-slate-600 line-through font-mono">{formatPrice(product.comparePrice)}</span>
+                  <span className="bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-bold px-2 py-0.5 rounded-lg">
+                    -{discountPercent}%
+                  </span>
+                </>
+              )}
+            </div>
+
+            <p className="text-slate-400 leading-relaxed text-sm">{product.description}</p>
+
+            {/* Variants */}
+            {hasVariants && (
+              <div className="space-y-4 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                {displayMode === 'COLOR_FIRST' ? (
+                  <>
+                    <ColorSection />
+                    {selectedColor && <SizeSection />}
+                  </>
+                ) : (
+                  <>
+                    <SizeSection />
+                    {(selectedSize || sizes.length === 0) && <ColorSection />}
+                  </>
+                )}
+                {selectedVariant && (
+                  <p className={`text-xs flex items-center gap-1.5 ${selectedVariant.stock > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${selectedVariant.stock > 0 ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                    {selectedVariant.stock > 0
+                      ? `${selectedVariant.stock} en stock`
+                      : 'Rupture sur cette variante'}
+                  </p>
+                )}
               </div>
             )}
-          </Swiper>
 
-          {displayImages.length > 1 && (
-            <Swiper
-              key={`thumbs-${selectedColor || 'default'}`}
-              modules={[Thumbs]}
-              onSwiper={setThumbsSwiper}
-              slidesPerView={4}
-              spaceBetween={8}
-              watchSlidesProgress
-              className="w-full"
-            >
-              {displayImages.map((img, i) => (
-                <SwiperSlide key={img.id || i}>
-                  <button className={`w-full aspect-square rounded-xl overflow-hidden border-2 transition-colors ${
-                    i === mainImg ? 'border-stone-800' : 'border-transparent hover:border-stone-300'
-                  }`}>
-                    <img src={img.url} alt="" className="w-full h-full object-cover" loading="lazy" />
+            {/* Quantity */}
+            {!isOutOfStock && (
+              <div>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2.5">Quantité</p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-11 h-11 rounded-xl border border-slate-700 flex items-center justify-center hover:border-slate-500 text-slate-300 hover:text-slate-100 transition-all"
+                  >
+                    <Minus size={14} />
                   </button>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          )}
+                  <span className="w-8 text-center font-mono font-semibold text-slate-100">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(Math.min(effectiveStock, quantity + 1))}
+                    className="w-11 h-11 rounded-xl border border-slate-700 flex items-center justify-center hover:border-slate-500 text-slate-300 hover:text-slate-100 transition-all"
+                  >
+                    <Plus size={14} />
+                  </button>
+                  <span className="text-xs text-slate-500 ml-1">{effectiveStock} disponibles</span>
+                </div>
+              </div>
+            )}
+
+            {/* CTA — desktop only */}
+            <div className="hidden md:flex flex-col gap-3 pt-1">
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock || addingCart}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 text-white font-semibold text-sm transition-all shadow-lg shadow-blue-700/30 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                >
+                  {addingCart
+                    ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    : <ShoppingBag size={17} />
+                  }
+                  {isOutOfStock ? 'Rupture de stock' : 'Ajouter au panier'}
+                </button>
+                <button
+                  onClick={handleWishlist}
+                  className="w-12 h-12 rounded-xl border border-slate-700 flex items-center justify-center text-slate-400 hover:text-red-400 hover:border-red-500/40 hover:bg-red-950/20 transition-all"
+                >
+                  <Heart size={18} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center gap-5 text-xs text-slate-600 py-1">
+                <span className="flex items-center gap-1.5"><ShieldCheck size={11} className="text-slate-500" /> Paiement sécurisé</span>
+                <span className="flex items-center gap-1.5"><Truck size={11} className="text-slate-500" /> Livraison suivie</span>
+                <span className="flex items-center gap-1.5"><Zap size={11} className="text-slate-500" /> Stock limité</span>
+              </div>
+
+              {isOutOfStock && (
+                <div className="space-y-2 pt-1">
+                  <PreorderButton product={product} whatsappNumber={whatsappNumber} />
+                  <p className="text-xs text-center text-slate-500">
+                    Envoyez-nous un message et nous vous préviendrons dès la remise en stock.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Infos produit */}
-        {/* pb-36 sur mobile pour laisser de la place au CTA sticky */}
-        <div className="space-y-5 pb-36 md:pb-0">
-          <div>
-            <p className="text-sm text-stone-500 font-medium mb-1">{product.category?.name}</p>
-            <h1 className="text-3xl font-bold text-stone-900 mb-2">{product.name}</h1>
-            {avgRating && (
-              <div className="flex items-center gap-2">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <Star key={i} size={14} className={i < Math.round(avgRating) ? 'fill-amber-400 text-amber-400' : 'text-stone-200'} />
-                  ))}
-                </div>
-                <span className="text-sm text-stone-500">{avgRating} ({reviews.length} avis)</span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold text-stone-900">{formatPrice(product.price)}</span>
-            {hasDiscount && (
-              <>
-                <span className="text-lg text-stone-400 line-through">{formatPrice(product.comparePrice)}</span>
-                <span className="bg-stone-800 text-white text-sm font-bold px-2 py-0.5 rounded-full">
-                  -{Math.round((1 - product.price / product.comparePrice) * 100)}%
-                </span>
-              </>
-            )}
-          </div>
-
-          <p className="text-stone-500 leading-relaxed">{product.description}</p>
-
-          {/* Variantes */}
-          {hasVariants && (
-            <div className="space-y-4">
-              {displayMode === 'COLOR_FIRST' ? (
-                <>
-                  <ColorSection />
-                  {selectedColor && <SizeSection />}
-                </>
-              ) : (
-                <>
-                  <SizeSection />
-                  {(selectedSize || sizes.length === 0) && <ColorSection />}
-                </>
-              )}
-              {selectedVariant && (
-                <p className="text-xs text-stone-400">
-                  {selectedVariant.stock > 0
-                    ? `${selectedVariant.stock} en stock pour cette variante`
-                    : 'Cette variante est en rupture de stock'}
-                </p>
-              )}
+        {/* ── CTA sticky mobile ── */}
+        <div
+          className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-40"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)', paddingTop: '0.75rem', paddingLeft: '1rem', paddingRight: '1rem' }}
+        >
+          {isOutOfStock ? (
+            <div className="space-y-2">
+              <PreorderButton product={product} whatsappNumber={whatsappNumber} />
+              <p className="text-xs text-center text-slate-500">Nous vous préviendrons dès la remise en stock.</p>
             </div>
-          )}
-
-          {/* Quantité — visible sur tous les écrans */}
-          {!isOutOfStock && (
-            <div>
-              <p className="text-sm font-medium text-stone-700 mb-2">Quantité</p>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-11 h-11 rounded-xl border border-stone-200 flex items-center justify-center hover:bg-stone-50 transition-colors"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="w-8 text-center font-semibold text-stone-800">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(Math.min(effectiveStock, quantity + 1))}
-                  className="w-11 h-11 rounded-xl border border-stone-200 flex items-center justify-center hover:bg-stone-50 transition-colors"
-                >
-                  <Plus size={14} />
-                </button>
-                <span className="text-xs text-stone-400 ml-1">{effectiveStock} en stock</span>
-              </div>
-            </div>
-          )}
-
-          {/* CTA desktop uniquement */}
-          <div className="hidden md:flex flex-col gap-3 pt-2">
+          ) : (
             <div className="flex gap-3">
-              <Button
-                className="flex-1"
-                size="lg"
-                loading={addingCart}
-                disabled={isOutOfStock}
-                onClick={handleAddToCart}
-              >
-                <ShoppingBag size={18} />
-                {isOutOfStock ? 'Rupture de stock' : 'Ajouter au panier'}
-              </Button>
               <button
                 onClick={handleWishlist}
-                className="w-12 h-12 rounded-xl border border-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-700 hover:border-stone-400 transition-colors"
+                className="w-12 h-12 rounded-xl border border-slate-700 flex items-center justify-center text-slate-400 hover:text-red-400 transition-all shrink-0"
               >
-                <Heart size={20} />
+                <Heart size={18} />
+              </button>
+              <button
+                onClick={handleAddToCart}
+                disabled={isOutOfStock || addingCart}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-700 text-white font-semibold text-sm shadow-lg shadow-blue-700/30 disabled:opacity-50 active:scale-[0.98] transition-all"
+              >
+                {addingCart
+                  ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <ShoppingBag size={17} />
+                }
+                <span>Ajouter — <span className="font-mono">{formatPrice(product.price)}</span></span>
               </button>
             </div>
-            <div className="flex items-center justify-center gap-4 text-xs text-stone-400 py-1">
-              <span className="flex items-center gap-1"><ShieldCheck size={12} /> Paiement sécurisé</span>
-              <span className="flex items-center gap-1"><Truck size={12} /> Livraison suivie</span>
-            </div>
-            {isOutOfStock && (
-              <div className="space-y-2">
-                <PreorderButton product={product} whatsappNumber={whatsappNumber} />
-                <p className="text-xs text-center text-stone-400">
-                  Envoyez-nous un message et nous vous préviendrons dès la remise en stock.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── CTA sticky mobile ── */}
-      <div
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-lg z-40"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)', paddingTop: '0.75rem', paddingLeft: '1rem', paddingRight: '1rem' }}
-      >
-        {isOutOfStock ? (
-          <div className="space-y-2">
-            <PreorderButton product={product} whatsappNumber={whatsappNumber} />
-            <p className="text-xs text-center text-stone-400">
-              Nous vous préviendrons dès la remise en stock.
-            </p>
-          </div>
-        ) : (
-          <div className="flex gap-3">
-            <button
-              onClick={handleWishlist}
-              className="w-12 h-12 rounded-xl border border-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-700 transition-colors shrink-0"
-            >
-              <Heart size={20} />
-            </button>
-            <Button
-              className="flex-1"
-              size="lg"
-              loading={addingCart}
-              disabled={isOutOfStock}
-              onClick={handleAddToCart}
-            >
-              <ShoppingBag size={18} />
-              <span>Ajouter — {formatPrice(product.price)}</span>
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Avis */}
-      <div className="border-t border-stone-100 pt-10">
-        <h2 className="text-2xl font-bold text-stone-800 mb-6">
-          Avis clients {reviews?.length ? `(${reviews.length})` : ''}
-        </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-3">
-            {reviews?.length ? (
-              reviews.map((r) => <ReviewCard key={r.id} review={r} />)
-            ) : (
-              <p className="text-stone-400 text-sm">Aucun avis pour l'instant. Soyez le premier !</p>
-            )}
-          </div>
-          {isAuthenticated && (
-            <div><ReviewForm productId={product.id} /></div>
           )}
         </div>
+
+        {/* Reviews */}
+        <div className="border-t border-slate-800 pt-12">
+          <h2 className="text-lg font-bold text-slate-100 uppercase tracking-wider mb-6 flex items-center gap-2">
+            <Star size={16} className="text-amber-400 fill-amber-400" />
+            Avis clients {reviews?.length ? <span className="text-slate-500 font-normal normal-case tracking-normal">({reviews.length})</span> : ''}
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-3">
+              {reviews?.length ? (
+                reviews.map((r) => <ReviewCard key={r.id} review={r} />)
+              ) : (
+                <p className="text-slate-500 text-sm">Aucun avis pour l'instant. Soyez le premier !</p>
+              )}
+            </div>
+            {isAuthenticated && (
+              <div><ReviewForm productId={product.id} /></div>
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   );
