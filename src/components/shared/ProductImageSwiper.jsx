@@ -7,16 +7,19 @@ export default function ProductImageSwiper({ images = [] }) {
 
   if (!images.length) return null;
 
+  const hasMultiple = images.length > 1;
+
   return (
     <div className="w-full flex flex-col gap-3">
 
       {/* Swiper principal */}
       <Swiper
         modules={[Navigation, Thumbs, Zoom]}
-        thumbs={{ swiper: thumbsSwiper }}
-        navigation
+        thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
+        navigation={hasMultiple}
         zoom
-        loop={images.length > 1}
+        loop={hasMultiple}
+        loopedSlides={images.length}
         className="w-full rounded-xl overflow-hidden bg-gray-50"
         style={{ aspectRatio: '1 / 1' }}
       >
@@ -35,12 +38,13 @@ export default function ProductImageSwiper({ images = [] }) {
       </Swiper>
 
       {/* Thumbnails */}
-      {images.length > 1 && (
+      {hasMultiple && (
         <Swiper
           modules={[Thumbs]}
           onSwiper={setThumbsSwiper}
-          slidesPerView={4}
+          slidesPerView={Math.min(images.length, 4)}
           spaceBetween={8}
+          loopedSlides={images.length}
           watchSlidesProgress
           className="w-full"
         >

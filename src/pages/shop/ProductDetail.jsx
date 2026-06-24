@@ -315,8 +315,10 @@ export default function ProductDetail() {
                 key={selectedColor || 'default'}
                 modules={[Navigation, Thumbs]}
                 thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
-                navigation
+                navigation={displayImages.length > 1}
                 loop={displayImages.length > 1}
+                loopedSlides={displayImages.length}
+                slidesPerView={1}
                 onSwiper={(s) => { mainSwiperRef.current = s; }}
                 onSlideChange={(s) => setMainImg(s.realIndex)}
                 className="aspect-square bg-slate-900 rounded-2xl overflow-hidden border border-slate-800"
@@ -355,9 +357,13 @@ export default function ProductDetail() {
               <Swiper
                 key={`thumbs-${selectedColor || 'default'}`}
                 modules={[Thumbs]}
-                onSwiper={setThumbsSwiper}
-                slidesPerView={4}
+                onSwiper={(s) => {
+                  setThumbsSwiper(null);
+                  setTimeout(() => setThumbsSwiper(s), 0);
+                }}
+                slidesPerView={Math.min(displayImages.length, 4)}
                 spaceBetween={8}
+                loopedSlides={displayImages.length}
                 watchSlidesProgress
                 className="w-full"
               >
