@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: 'Inter', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f0f4ff;
+}
+::-webkit-scrollbar-thumb {
+  background: #93c5fd;
+  border-radius: 999px;
+}
+
+/* Fix zoom iOS/Android */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Indicateur de focus — bleu SonTech */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Fix débordement horizontal global */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Images responsives par défaut */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Meilleure lisibilité mobile */
+@media (max-width: 640px) {
+  h1 { font-size: 1.6rem !important; }
+  h2 { font-size: 1.3rem !important; }
+}
+
+/* Tap targets plus grands sur mobile */
+@media (max-width: 640px) {
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
+}
+
+/* Supprime le flash bleu au tap sur mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Texte ne déborde pas sur petit écran */
+p, span, h1, h2, h3, h4, li {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Smooth scroll natif */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible — bleu SonTech */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}

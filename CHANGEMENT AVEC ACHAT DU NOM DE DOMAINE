@@ -1,0 +1,23 @@
+Vercel (frontend)
+
+Ajouter le domaine dans Settings → Domains
+Mettre à jour VITE_API_URL avec la nouvelle URL backend si elle change
+
+Render (backend)
+
+Mettre à jour la variable CLIENT_URL avec ton nouveau domaine ex: https://sonshop.sn
+
+OneSignal
+
+Settings → Platforms → Web Push → changer l'URL du site vers ton nouveau domaine
+⚠️ Les abonnés existants seront perdus, ils devront réautoriser les notifs
+
+Brevo (emails)
+
+Ajouter et vérifier ton domaine pour améliorer la délivrabilité des emails
+
+Variables à mettre à jour partout
+
+CLIENT_URL sur Render
+VITE_APP_URL sur Vercel si tu l'as
+Les liens dans email.utils.js si hardcodé
