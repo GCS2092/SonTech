@@ -1,33 +1,52 @@
 import { Link } from 'react-router-dom';
+import { Cpu } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-stone-900 text-stone-400 mt-auto border-t-2 border-rose-500/20">
+    <footer className="bg-slate-900 text-slate-400 mt-auto border-t-2 border-blue-500/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
 
+          {/* Branding SonTech */}
           <div>
             <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Cpu size={14} className="text-white" />
+              </div>
               <span className="font-bold text-white text-lg">
-                Son<span className="text-rose-400">Shop</span>
+                Son<span className="text-blue-400">Tech</span>
               </span>
             </div>
             <p className="text-sm leading-relaxed">
-              Vetements et accessoires en ligne. Produits authentiques, livraison rapide.
+              Smartphones, ordinateurs et accessoires tech. Produits garantis, livrés partout au Sénégal.
             </p>
+            {/* Lien vers SonShop */}
+            <a
+              href="https://urban-beauty.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-4 text-xs text-rose-400 hover:text-rose-300 transition-colors font-medium"
+            >
+              👗 Découvrir SonShop
+            </a>
           </div>
 
+          {/* Boutique */}
           <div>
-            <h4 className="text-rose-400 font-semibold mb-3 text-sm uppercase tracking-wider">Boutique</h4>
+            <h4 className="text-blue-400 font-semibold mb-3 text-sm uppercase tracking-wider">Boutique</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/products" className="hover:text-white transition-colors">Tous les produits</Link></li>
+              <li><Link to="/products?category=smartphones" className="hover:text-white transition-colors">Smartphones</Link></li>
+              <li><Link to="/products?category=ordinateurs" className="hover:text-white transition-colors">Ordinateurs</Link></li>
+              <li><Link to="/products?category=audio" className="hover:text-white transition-colors">Audio</Link></li>
               <li><Link to="/cart" className="hover:text-white transition-colors">Mon panier</Link></li>
               <li><Link to="/orders" className="hover:text-white transition-colors">Mes commandes</Link></li>
             </ul>
           </div>
 
+          {/* Mon compte */}
           <div>
-            <h4 className="text-rose-400 font-semibold mb-3 text-sm uppercase tracking-wider">Mon compte</h4>
+            <h4 className="text-blue-400 font-semibold mb-3 text-sm uppercase tracking-wider">Mon compte</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/account/profile" className="hover:text-white transition-colors">Profil</Link></li>
               <li><Link to="/account/addresses" className="hover:text-white transition-colors">Adresses</Link></li>
@@ -35,8 +54,9 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Informations */}
           <div>
-            <h4 className="text-rose-400 font-semibold mb-3 text-sm uppercase tracking-wider">Informations</h4>
+            <h4 className="text-blue-400 font-semibold mb-3 text-sm uppercase tracking-wider">Informations</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/about" className="hover:text-white transition-colors">À propos</Link></li>
               <li><Link to="/contact" className="hover:text-white transition-colors">Nous contacter</Link></li>
@@ -46,8 +66,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-stone-800 pt-6 text-xs text-center">
-          © {new Date().getFullYear()} SonShop — Tous droits réservés
+        <div className="border-t border-slate-800 pt-6 text-xs text-center">
+          © {new Date().getFullYear()} SonTech — Tous droits réservés
         </div>
       </div>
     </footer>
