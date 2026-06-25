@@ -1,4 +1,5 @@
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export const STORE_ID = import.meta.env.VITE_STORE_ID || '1d791ecc-7f71-4fa8-bcc9-9e62cbe700e9';
 
 export const ROLES = {
