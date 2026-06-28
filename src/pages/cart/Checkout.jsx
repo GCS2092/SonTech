@@ -18,6 +18,9 @@ import Button from '../../components/ui/Button';
 import PaymentModal from '../../components/checkout/PaymentModal';
 import { toast } from 'sonner';
 
+// ✅ STORE ID sonTech — hardcodé en fallback si la variable d'env n'est pas définie
+const STORE_ID = import.meta.env.VITE_STORE_ID || '1d791ecc-7f71-4fa8-bcc9-9e62cbe700e9';
+
 // --- Destinations ---
 const DESTINATIONS = [
   {
@@ -271,7 +274,9 @@ export default function Checkout() {
     setValue('city', addr.city);
   };
 
+  // ✅ storeId correctement inclus dans le payload
   const buildOrderPayload = (formData) => ({
+    storeId: STORE_ID,
     items: cart.items.map((item) => ({
       productId: item.product.id,
       variantId: item.variant?.id || null,
@@ -301,7 +306,7 @@ export default function Checkout() {
     if (!couponCode.trim()) return;
     setValidatingCoupon(true);
     try {
-      const { data } = await couponsApi.validate(couponCode, subtotal);
+      const { data } = await couponsApi.validate(couponCode, subtotal, STORE_ID);
       setCoupon(data.coupon);
       toast.success(
         `Coupon appliqué : -${data.coupon.type === 'PERCENTAGE' ? data.coupon.value + '%' : formatPrice(data.discount)}`
