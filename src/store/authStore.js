@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AUTH_TOKEN_KEY } from '../utils/constants';
 
-// ✅ Le login OneSignal est géré par useNotifications (AuthContext)
+// ✅ front end tech Le login OneSignal est géré par useNotifications (AuthContext)
 // On garde uniquement le logout pour dissocier l'appareil proprement
 
 async function logoutFromOneSignal() {

@@ -18,6 +18,27 @@ export function AuthProvider({ children }) {
   // ✅ Demande permission OneSignal + associe l'user dès qu'il est connecté
   useNotifications();
 
+  // ✅ Auto-login si token passé dans l'URL (depuis UrbanBeauty)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get('token');
+    if (urlToken && !isAuthenticated) {
+      // Nettoie l'URL sans recharger la page
+      window.history.replaceState({}, '', window.location.pathname);
+      // Stocke le token provisoirement et vérifie avec /me
+      setAuth(null, urlToken);
+      authApi.me()
+        .then(({ data }) => {
+          setAuth(data, urlToken);
+          fetchCart(data.id);
+          toast.success(`Bienvenue ${data.firstName} !`);
+        })
+        .catch(() => {
+          storeLogout();
+        });
+    }
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated && user?.id) {
       fetchCart(user.id);
@@ -60,7 +81,6 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      // ✅ Dissocie l'utilisateur OneSignal à la déconnexion
       await OneSignal.logout();
     } catch {}
     try { await authApi.logout(); } catch {}
