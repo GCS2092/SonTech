@@ -14,24 +14,21 @@ const formatDate = (iso) =>
 
 const STATUS_STYLES = {
   GENERATED: 'bg-blue-50 text-blue-700',
-  SENT: 'bg-indigo-50 text-indigo-700',
-  PAID: 'bg-emerald-50 text-emerald-700',
+  SENT:      'bg-indigo-50 text-indigo-700',
+  PAID:      'bg-emerald-50 text-emerald-700',
   CANCELLED: 'bg-red-50 text-red-700',
 };
 
 const STATUS_LABELS = {
   GENERATED: 'Generee',
-  SENT: 'Envoyee',
-  PAID: 'Payee',
+  SENT:      'Envoyee',
+  PAID:      'Payee',
   CANCELLED: 'Annulee',
 };
 
-// ---------------------------------------------------------------------------
-// Helper — construit le message WhatsApp pour envoyer la facture au client
-// ---------------------------------------------------------------------------
 const buildInvoiceWhatsAppMessage = ({ inv, clientName }) => {
   const lines = [];
-  lines.push(`*Facture SonShop*`);
+  lines.push(`*Facture SonTech*`);  // ✅ corrigé
   lines.push(`N° Facture : *${inv.invoiceNumber}*`);
   lines.push(`Commande : ${inv.order?.orderNumber || '-'}`);
   lines.push('');
@@ -46,24 +43,24 @@ const buildInvoiceWhatsAppMessage = ({ inv, clientName }) => {
 };
 
 export default function AdminInvoices() {
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [page, setPage] = useState(1);
-  const [storeId, setStoreId] = useState('');
-  const [downloading, setDownloading] = useState(null);
-  const [exporting, setExporting] = useState(false);
+  const [search, setSearch]               = useState('');
+  const [status, setStatus]               = useState('');
+  const [from, setFrom]                   = useState('');
+  const [to, setTo]                       = useState('');
+  const [page, setPage]                   = useState(1);
+  const [storeId, setStoreId]             = useState('');
+  const [downloading, setDownloading]     = useState(null);
+  const [exporting, setExporting]         = useState(false);
   const [sendingWhatsApp, setSendingWhatsApp] = useState(null);
 
   const filterParams = {
     page,
     limit: 20,
     ...(search.trim() && { search: search.trim() }),
-    ...(status && { status }),
-    ...(from && { from }),
-    ...(to && { to }),
-    ...(storeId && { storeId }),
+    ...(status   && { status }),
+    ...(from     && { from }),
+    ...(to       && { to }),
+    ...(storeId  && { storeId }),
   };
 
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -71,16 +68,10 @@ export default function AdminInvoices() {
     queryFn: () => adminApi.getInvoices(filterParams).then((r) => r.data),
   });
 
-  const { data: settings } = useQuery({
-    queryKey: ['settings'],
-    queryFn: () => settingsApi.getPublic().then((r) => r.data),
-  });
+  const invoices    = data?.data       || [];
+  const total       = data?.total      ?? 0;
+  const totalPages  = data?.totalPages ?? 1;
 
-  const invoices = data?.data || [];
-  const total = data?.total ?? 0;
-  const totalPages = data?.totalPages ?? 1;
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
   const getClientName = (inv) => {
     const o = inv.order;
     if (!o) return '-';
@@ -88,24 +79,17 @@ export default function AdminInvoices() {
     return o.guestName || '-';
   };
 
-  // Recupere le numero de telephone du client depuis la commande
   const getClientPhone = (inv) => {
     const o = inv.order;
     if (!o) return null;
-    const phone =
-      o.shippingAddress?.phone ||
-      o.user?.phone ||
-      o.guestPhone ||
-      null;
+    const phone = o.shippingAddress?.phone || o.user?.phone || o.guestPhone || null;
     if (!phone) return null;
-    // Nettoie le numero : garde uniquement les chiffres, ajoute 221 si numero local senegalais
     const digits = phone.replace(/\D/g, '');
     if (digits.startsWith('221')) return digits;
     if (digits.length === 9) return `221${digits}`;
     return digits;
   };
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
   const handleDownload = async (invoice) => {
     setDownloading(invoice.id);
     try {
@@ -133,35 +117,27 @@ export default function AdminInvoices() {
 
   const handleSendWhatsApp = (inv) => {
     const clientPhone = getClientPhone(inv);
-
     if (!clientPhone) {
       toast.error('Aucun numero de telephone trouve pour ce client.');
       return;
     }
-
     setSendingWhatsApp(inv.id);
-
-    const message = buildInvoiceWhatsAppMessage({
-      inv,
-      clientName: getClientName(inv),
-    });
-
+    const message = buildInvoiceWhatsAppMessage({ inv, clientName: getClientName(inv) });
     window.open(`https://wa.me/${clientPhone}?text=${message}`, '_blank');
     toast.success(`Facture envoyee via WhatsApp a ${clientPhone}`);
     setSendingWhatsApp(null);
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-stone-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mb-6 pl-12 lg:pl-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <FileText size={16} className="text-rose-500" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-stone-400">Comptabilite</span>
+            <FileText size={16} className="text-blue-500" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Comptabilite</span>
           </div>
-          <h1 className="text-2xl font-bold text-stone-900">Factures</h1>
-          <p className="text-stone-500 text-sm mt-1">{total} facture(s)</p>
+          <h1 className="text-2xl font-bold text-slate-900">Factures</h1>
+          <p className="text-slate-500 text-sm mt-1">{total} facture(s)</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -174,7 +150,7 @@ export default function AdminInvoices() {
           </button>
           <button
             onClick={() => refetch()}
-            className="flex items-center gap-2 border border-stone-200 bg-white px-4 py-2 rounded-xl text-sm text-stone-600 hover:bg-stone-50"
+            className="flex items-center gap-2 border border-slate-200 bg-white px-4 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-50"
           >
             <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} /> Actualiser
           </button>
@@ -182,22 +158,22 @@ export default function AdminInvoices() {
       </div>
 
       {/* Filtres */}
-      <div className="bg-white rounded-2xl border border-stone-200 p-4 mb-6 space-y-3">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 mb-6 space-y-3">
         <div className="flex flex-wrap gap-3">
           <StoreFilter value={storeId} onChange={(v) => { setStoreId(v || ''); setPage(1); }} />
           <div className="flex-1 min-w-[200px] relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="N° facture, commande, client..."
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-200 text-sm"
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm"
             />
           </div>
           <select
             value={status}
             onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-            className="border border-stone-200 rounded-xl px-3 py-2.5 text-sm"
+            className="border border-slate-200 rounded-xl px-3 py-2.5 text-sm"
           >
             <option value="">Tous les statuts</option>
             {Object.entries(STATUS_LABELS).map(([k, v]) => (
@@ -206,19 +182,18 @@ export default function AdminInvoices() {
           </select>
         </div>
         <DateRangeFilter
-          from={from}
-          to={to}
+          from={from} to={to}
           onFromChange={(v) => { setFrom(v); setPage(1); }}
-          onToChange={(v) => { setTo(v); setPage(1); }}
+          onToChange={(v)   => { setTo(v);   setPage(1); }}
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
         {isLoading ? (
-          <div className="py-20 text-center text-stone-400">Chargement...</div>
+          <div className="py-20 text-center text-slate-400">Chargement...</div>
         ) : invoices.length === 0 ? (
-          <div className="py-20 text-center text-stone-400">
+          <div className="py-20 text-center text-slate-400">
             <FileText size={40} className="mx-auto mb-3 opacity-30" />
             <p>Aucune facture pour ces criteres.</p>
           </div>
@@ -226,7 +201,7 @@ export default function AdminInvoices() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-stone-50 text-left text-xs font-semibold text-stone-500 uppercase">
+                <tr className="bg-slate-50 text-left text-xs font-semibold text-slate-500 uppercase">
                   <th className="px-5 py-3">N° Facture</th>
                   <th className="px-5 py-3">Commande</th>
                   <th className="px-5 py-3">Client</th>
@@ -237,45 +212,38 @@ export default function AdminInvoices() {
                   <th className="px-5 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-slate-100">
                 {invoices.map((inv) => {
                   const clientPhone = getClientPhone(inv);
                   return (
-                    <tr key={inv.id} className="hover:bg-stone-50">
+                    <tr key={inv.id} className="hover:bg-slate-50">
                       <td className="px-5 py-4 font-mono text-xs font-semibold">{inv.invoiceNumber}</td>
                       <td className="px-5 py-4 font-mono text-xs">{inv.order?.orderNumber || '-'}</td>
                       <td className="px-5 py-4">{getClientName(inv)}</td>
-                      <td className="px-5 py-4 text-stone-500 text-xs font-mono">
-                        {clientPhone ? `+${clientPhone}` : <span className="text-stone-300">-</span>}
+                      <td className="px-5 py-4 text-slate-500 text-xs font-mono">
+                        {clientPhone ? `+${clientPhone}` : <span className="text-slate-300">-</span>}
                       </td>
-                      <td className="px-5 py-4 text-stone-600">{formatDate(inv.issuedAt)}</td>
+                      <td className="px-5 py-4 text-slate-600">{formatDate(inv.issuedAt)}</td>
                       <td className="px-5 py-4 font-semibold">{formatPrice(inv.total)}</td>
                       <td className="px-5 py-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            STATUS_STYLES[inv.status] || 'bg-stone-100'
-                          }`}
-                        >
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[inv.status] || 'bg-slate-100'}`}>
                           {STATUS_LABELS[inv.status] || inv.status}
                         </span>
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Bouton PDF */}
                           <button
                             onClick={() => handleDownload(inv)}
                             disabled={downloading === inv.id}
-                            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-stone-200 hover:bg-stone-100 disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-50"
                           >
                             <Download size={13} />
                             {downloading === inv.id ? '...' : 'PDF'}
                           </button>
-
-                          {/* Bouton WhatsApp */}
                           <button
                             onClick={() => handleSendWhatsApp(inv)}
                             disabled={sendingWhatsApp === inv.id || !clientPhone}
-                            title={!clientPhone ? 'Aucun telephone disponible' : 'Envoyer la facture par WhatsApp'}
+                            title={!clientPhone ? 'Aucun telephone disponible' : 'Envoyer via WhatsApp'}
                             className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
