@@ -6,10 +6,10 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
 import { ArrowLeft, CheckCircle, Zap } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// ✅ VITE_API_URL est sans /api (ex: https://urbanbeauty-v7py.onrender.com)
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api';
 
 // ── Schémas de validation par étape ──────────────────────────────────────────
 
@@ -35,7 +35,7 @@ const schemaPassword = z.object({
 // ── Composant principal ───────────────────────────────────────────────────────
 
 export default function Register() {
-  const { login } = useAuth(); // ✅ login automatique après inscription
+  const { login } = useAuth();
 
   const [step, setStep]             = useState(1);
   const [email, setEmail]           = useState('');
@@ -84,13 +84,11 @@ export default function Register() {
     setLoading(true);
     setErrorMsg('');
     try {
-      // 1. Crée le compte
       await axios.post(
         `${API}/auth/register/complete`,
         { firstName, lastName, phone, password },
         { headers: { Authorization: `Bearer ${setupToken}` } }
       );
-      // 2. ✅ Connecte automatiquement l'utilisateur
       await login({ email, password });
     } catch (err) {
       setErrorMsg(err?.response?.data?.message || 'Erreur lors de la création du compte.');
