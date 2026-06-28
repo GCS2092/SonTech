@@ -6,10 +6,9 @@ import useCartStore from '../../store/cartStore';
 import useUiStore from '../../store/uiStore';
 import { useAuth } from '../../context/AuthContext';
 import { couponsApi } from '../../api/coupons.api';
-import { STORE_ID } from '../../utils/constants';
 
 export default function Navbar() {
-  const { isAuthenticated, user, token } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { getTotalItems } = useCartStore();
   const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useUiStore();
   const { logout } = useAuth();
@@ -24,7 +23,7 @@ export default function Navbar() {
   ];
 
   useEffect(() => {
-    couponsApi.getPublic(STORE_ID)
+    couponsApi.getPublic()
       .then(res => setPromoCoupons(res.data || []))
       .catch(() => {});
   }, []);
@@ -59,29 +58,29 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-blue-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo */}
+          {/* Logo SonTech */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-stone-900 flex items-center justify-center">
-              <ShoppingBag size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center">
+              <Cpu size={16} className="text-white" />
             </div>
-            <span className="font-bold text-xl tracking-tight text-stone-900">
-              Son<span className="text-stone-500">Shop</span>
+            <span className="font-bold text-xl tracking-tight text-slate-900">
+              Son<span className="text-blue-500">Tech</span>
             </span>
           </Link>
 
-          {/* Bannière promo — entre logo et hamburger, mobile + desktop */}
+          {/* Bannière promo */}
           {currentPromo && (
             <div className="flex-1 flex justify-center px-2">
               <div
                 style={{
                   opacity: visible ? 1 : 0,
                   transition: 'opacity 0.4s ease',
-                  background: 'linear-gradient(90deg, #fff1f2, #ffe4e6)',
-                  border: '1px solid #fda4af',
+                  background: 'linear-gradient(90deg, #eff6ff, #dbeafe)',
+                  border: '1px solid #93c5fd',
                   borderRadius: '999px',
                   padding: '4px 10px',
                   display: 'flex',
@@ -91,11 +90,11 @@ export default function Navbar() {
                   animation: 'promoPulse 2.5s ease-in-out infinite',
                 }}
               >
-                <Tag size={11} color="#e11d48" style={{ flexShrink: 0 }} />
+                <Tag size={11} color="#2563eb" style={{ flexShrink: 0 }} />
                 <span style={{
                   fontSize: '11px',
                   fontWeight: 700,
-                  color: '#be123c',
+                  color: '#1d4ed8',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -103,7 +102,7 @@ export default function Navbar() {
                   {formatPromo(currentPromo)}
                 </span>
                 {currentPromo.expiresAt && (
-                  <span style={{ fontSize: '10px', color: '#e11d48', opacity: 0.7, flexShrink: 0 }}>
+                  <span style={{ fontSize: '10px', color: '#2563eb', opacity: 0.7, flexShrink: 0 }}>
                     · {formatExpiry(currentPromo.expiresAt)}
                   </span>
                 )}
@@ -114,24 +113,24 @@ export default function Navbar() {
           {/* Actions */}
           <div className="flex items-center gap-2">
 
-            {/* Lien SonTech — desktop */}
+            {/* Lien SonShop — desktop */}
             <a
-              href={isAuthenticated && token ? `https://son-tech.vercel.app?token=${token}` : "https://son-tech.vercel.app"}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="hidden md:flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-medium transition-colors mr-1"
->
-  🔌 SonTech
-</a>
+              href="https://urban-beauty.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-1 text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors mr-1"
+            >
+              👗 SonShop
+            </a>
 
-            {/* Panier — desktop seulement */}
+            {/* Panier — desktop */}
             <Link
               to="/cart"
-              className="relative p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors hidden md:block"
+              className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors hidden md:block"
             >
               <ShoppingBag size={20} />
               {getTotalItems() > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-stone-900 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 bg-blue-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {getTotalItems()}
                 </span>
               )}
@@ -142,7 +141,7 @@ export default function Navbar() {
                 {/* Wishlist — desktop */}
                 <Link
                   to="/account/wishlist"
-                  className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors hidden md:block"
+                  className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors hidden md:block"
                 >
                   <Heart size={20} />
                 </Link>
@@ -150,7 +149,7 @@ export default function Navbar() {
                 {/* Notifications — desktop */}
                 <Link
                   to="/account/notifications"
-                  className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors hidden md:block"
+                  className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors hidden md:block"
                 >
                   <Bell size={20} />
                 </Link>
@@ -159,9 +158,9 @@ export default function Navbar() {
                 <div className="relative hidden md:block">
                   <button
                     onClick={() => setProfileOpen(!profileOpen)}
-                    className="flex items-center gap-2 p-1.5 rounded-full hover:bg-stone-100 transition-colors"
+                    className="flex items-center gap-2 p-1.5 rounded-full hover:bg-blue-50 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
                       {user?.firstName?.[0]?.toUpperCase()}
                     </div>
                   </button>
@@ -169,30 +168,30 @@ export default function Navbar() {
                   {profileOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                      <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-stone-100 py-2 z-50">
-                        <div className="px-4 py-2 border-b border-stone-100">
-                          <p className="font-semibold text-stone-800 text-sm">
+                      <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-blue-100 py-2 z-50">
+                        <div className="px-4 py-2 border-b border-slate-100">
+                          <p className="font-semibold text-slate-800 text-sm">
                             {user?.firstName} {user?.lastName}
                           </p>
-                          <p className="text-xs text-stone-400">{user?.email}</p>
+                          <p className="text-xs text-slate-400">{user?.email}</p>
                         </div>
                         <Link to="/account/profile" onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 transition-colors">
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-blue-50 transition-colors">
                           <User size={15} /> Mon profil
                         </Link>
                         <Link to="/orders" onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 transition-colors">
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-blue-50 transition-colors">
                           <ShoppingBag size={15} /> Mes commandes
                         </Link>
                         {user?.role === 'ADMIN' && (
                           <Link to="/admin" onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-stone-900 font-medium hover:bg-stone-50 transition-colors">
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-slate-900 font-medium hover:bg-blue-50 transition-colors">
                             Dashboard Admin
                           </Link>
                         )}
                         <button
                           onClick={() => { setProfileOpen(false); logout(); }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 transition-colors"
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-blue-50 transition-colors"
                         >
                           Déconnexion
                         </button>
@@ -204,7 +203,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="hidden md:flex items-center gap-1.5 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+                className="hidden md:flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
               >
                 <User size={15} /> Connexion
               </Link>
@@ -212,7 +211,7 @@ export default function Navbar() {
 
             {/* Hamburger mobile */}
             <button
-              className="md:hidden p-2 text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+              className="md:hidden p-2 text-slate-600 hover:bg-blue-50 rounded-lg transition-colors"
               onClick={mobileMenuOpen ? closeMobileMenu : openMobileMenu}
               aria-label="Menu"
             >
@@ -223,7 +222,7 @@ export default function Navbar() {
 
         {/* Menu mobile déroulant */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-stone-100 py-4 flex flex-col gap-1">
+          <div className="md:hidden border-t border-blue-100 py-4 flex flex-col gap-1">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
@@ -232,22 +231,22 @@ export default function Navbar() {
                 onClick={closeMobileMenu}
                 className={({ isActive }) =>
                   `text-sm font-medium px-3 py-2.5 rounded-xl transition-colors ${
-                    isActive ? 'text-stone-900 bg-stone-100' : 'text-stone-600 hover:bg-stone-50'
+                    isActive ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:bg-blue-50'
                   }`
                 }
               >
                 {link.label}
               </NavLink>
             ))}
-            {/* Lien SonTech — mobile */}
+            {/* Lien SonShop — mobile */}
             <a
-            href={isAuthenticated && token ? `https://son-tech.vercel.app?token=${token}` : "https://son-tech.vercel.app"}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-sm font-medium px-3 py-2.5 rounded-xl text-blue-500 hover:bg-blue-50 transition-colors"
->
-  🔌 Découvrir SonTech
-</a>
+              href="https://urban-beauty.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium px-3 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors"
+            >
+              👗 Découvrir SonShop
+            </a>
             {isAuthenticated && (
               <>
                 <NavLink
@@ -255,7 +254,7 @@ export default function Navbar() {
                   onClick={closeMobileMenu}
                   className={({ isActive }) =>
                     `text-sm font-medium px-3 py-2.5 rounded-xl transition-colors ${
-                      isActive ? 'text-stone-900 bg-stone-100' : 'text-stone-600 hover:bg-stone-50'
+                      isActive ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:bg-blue-50'
                     }`
                   }
                 >
@@ -263,7 +262,7 @@ export default function Navbar() {
                 </NavLink>
                 <button
                   onClick={() => { closeMobileMenu(); logout(); }}
-                  className="text-left text-sm font-medium px-3 py-2.5 rounded-xl text-stone-600 hover:bg-stone-50 transition-colors"
+                  className="text-left text-sm font-medium px-3 py-2.5 rounded-xl text-slate-600 hover:bg-blue-50 transition-colors"
                 >
                   Déconnexion
                 </button>
@@ -275,8 +274,8 @@ export default function Navbar() {
 
       <style>{`
         @keyframes promoPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.2); }
-          50% { box-shadow: 0 0 0 5px rgba(225, 29, 72, 0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.2); }
+          50% { box-shadow: 0 0 0 5px rgba(37, 99, 235, 0); }
         }
       `}</style>
     </header>
