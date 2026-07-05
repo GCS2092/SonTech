@@ -1,0 +1,91 @@
+import { Link } from 'react-router-dom';
+import { Cpu, Truck } from 'lucide-react';
+
+export default function Footer() {
+  return (
+    <footer className="bg-slate-900 text-slate-400 mt-auto border-t-2 border-blue-500/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+
+          {/* Branding SonTech */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Cpu size={14} className="text-white" />
+              </div>
+              <span className="font-bold text-white text-lg">
+                Son<span className="text-blue-400">Tech</span>
+              </span>
+            </div>
+
+            <p className="text-sm leading-relaxed">
+              Smartphones, ordinateurs et accessoires tech. Produits garantis, livrés partout au Sénégal.
+            </p>
+
+            <Link
+              to="/suivi"
+              className="mt-4 inline-flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-300 hover:text-blue-200 text-sm font-medium px-3.5 py-2 rounded-xl transition-colors"
+            >
+              <Truck size={15} /> Suivre ma commande
+            </Link>
+
+            
+              href="https://urban-beauty.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 mt-3 text-xs text-rose-400 hover:text-rose-300 transition-colors font-medium"
+            >
+              👗 Découvrir SonShop
+            </a>
+          </div>
+
+          {/* Boutique */}
+          <div>
+            <h4 className="text-blue-400 font-semibold mb-3 text-sm uppercase tracking-wider">
+              Boutique
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/products" className="hover:text-white transition-colors">Tous les produits</Link></li>
+              <li><Link to="/products?category=smartphones" className="hover:text-white transition-colors">Smartphones</Link></li>
+              <li><Link to="/products?category=ordinateurs" className="hover:text-white transition-colors">Ordinateurs</Link></li>
+              <li><Link to="/products?category=audio" className="hover:text-white transition-colors">Audio</Link></li>
+              <li><Link to="/cart" className="hover:text-white transition-colors">Mon panier</Link></li>
+              <li><Link to="/orders" className="hover:text-white transition-colors">Mes commandes</Link></li>
+              <li><Link to="/suivi" className="hover:text-white transition-colors">Suivre ma commande</Link></li>
+            </ul>
+          </div>
+
+          {/* Mon compte */}
+          <div>
+            <h4 className="text-blue-400 font-semibold mb-3 text-sm uppercase tracking-wider">
+              Mon compte
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/account/profile" className="hover:text-white transition-colors">Profil</Link></li>
+              <li><Link to="/account/addresses" className="hover:text-white transition-colors">Adresses</Link></li>
+              <li><Link to="/account/wishlist" className="hover:text-white transition-colors">Favoris</Link></li>
+            </ul>
+          </div>
+
+          {/* Informations */}
+          <div>
+            <h4 className="text-blue-400 font-semibold mb-3 text-sm uppercase tracking-wider">
+              Informations
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/about" className="hover:text-white transition-colors">À propos</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Nous contacter</Link></li>
+              <li><Link to="/returns" className="hover:text-white transition-colors">Politique de retour</Link></li>
+              <li><Link to="/cgv" className="hover:text-white transition-colors">Conditions générales de vente</Link></li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div className="border-t border-slate-800 pt-6 text-xs text-center">
+          © {new Date().getFullYear()} SonTech — Tous droits réservés
+        </div>
+      </div>
+    </footer>
+  );
+}
