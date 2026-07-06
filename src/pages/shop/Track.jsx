@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search, MapPin, CreditCard, Package, ChevronLeft,
-  ShieldCheck, MessageCircle,
+  ShieldCheck, MessageCircle, XCircle,
 } from 'lucide-react';
 import { ordersApi } from '../../api/orders.api';
 import { formatPrice } from '../../utils/formatPrice';
@@ -13,6 +13,9 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
 
+const LAST_ORDER_KEY = 'urbanbeauty_last_order_number';
+
+// ── Étapes du parcours (hors DRAFT / CANCELLED) ──────────────
 const STEPS = [
   { key: 'PENDING', label: 'En attente', short: 'Reçue', emoji: '🕐' },
   { key: 'CONFIRMED', label: 'Confirmée', short: 'Confirmée', emoji: '✅' },
@@ -34,7 +37,12 @@ const HERO_TEXT = {
 export default function Track() {
   const { orderNumber: paramOrderNumber } = useParams();
   const navigate = useNavigate();
-  const [search, setSearch] = useState(paramOrderNumber || '');
+
+  // Priorité : numéro dans l'URL > dernier numéro mémorisé localement
+  const initialOrderNumber =
+    paramOrderNumber || localStorage.getItem(LAST_ORDER_KEY) || '';
+
+  const [search, setSearch] = useState(initialOrderNumber);
   const [activeSearch, setActiveSearch] = useState(paramOrderNumber || null);
 
   useEffect(() => {
@@ -51,6 +59,13 @@ export default function Track() {
     retry: false,
   });
 
+  // Mémoriser le numéro dès qu'une recherche aboutit à une commande trouvée
+  useEffect(() => {
+    if (order?.orderNumber) {
+      localStorage.setItem(LAST_ORDER_KEY, order.orderNumber);
+    }
+  }, [order]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const clean = search.trim();
@@ -65,6 +80,8 @@ export default function Track() {
   const isCancelled = order?.status === 'CANCELLED';
   const isDraft = order?.status === 'DRAFT';
   const hero = order ? HERO_TEXT[order.status] : null;
+
+  // Position (%) de la petite voiture sur la frise
   const progressPercent =
     currentStepIndex >= 0 ? (currentStepIndex / (STEPS.length - 1)) * 100 : 0;
 
@@ -83,22 +100,23 @@ export default function Track() {
 
       <Link
         to="/"
-        className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-700 mb-6 transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-stone-400 hover:text-stone-700 mb-6 transition-colors"
       >
         <ChevronLeft size={16} /> Retour à l'accueil
       </Link>
 
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Suivre ma commande</h1>
-        <p className="text-slate-400 text-sm">
+        <h1 className="text-3xl font-bold text-stone-800 mb-2">Suivre ma commande</h1>
+        <p className="text-stone-400 text-sm">
           Entrez votre numéro de commande pour voir où en est votre colis 📦
         </p>
       </div>
 
+      {/* Barre de recherche */}
       <form onSubmit={handleSubmit} className="flex gap-2 mb-8">
         <div className="flex-1">
           <Input
-            placeholder="Ex : ST-2024-001"
+            placeholder="Ex : UB-2024-001"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -108,8 +126,9 @@ export default function Track() {
         </Button>
       </form>
 
+      {/* États */}
       {!activeSearch && (
-        <div className="text-center text-slate-400 text-sm py-16">
+        <div className="text-center text-stone-400 text-sm py-16">
           Le numéro de commande se trouve dans votre email ou message WhatsApp de confirmation.
         </div>
       )}
@@ -123,8 +142,8 @@ export default function Track() {
       {activeSearch && !isLoading && (isError || !order) && (
         <div className="text-center py-16 space-y-3">
           <p className="text-4xl">🔍</p>
-          <p className="text-slate-600 font-medium">Commande introuvable</p>
-          <p className="text-slate-400 text-sm">
+          <p className="text-stone-600 font-medium">Commande introuvable</p>
+          <p className="text-stone-400 text-sm">
             Vérifiez le numéro saisi ou contactez-nous si le problème persiste.
           </p>
         </div>
@@ -133,12 +152,12 @@ export default function Track() {
       {order && (
         <div className="space-y-5">
 
-          {/* Hero statut */}
+          {/* ── Hero statut ── */}
           <div
             className={`rounded-3xl p-8 text-center border ${
               isCancelled
                 ? 'bg-red-50 border-red-100'
-                : 'bg-gradient-to-br from-blue-50 via-white to-sky-50 border-blue-100'
+                : 'bg-gradient-to-br from-rose-50 via-white to-amber-50 border-rose-100'
             }`}
           >
             <div
@@ -147,24 +166,27 @@ export default function Track() {
             >
               {hero.emoji}
             </div>
-            <h2 className="text-xl font-bold text-slate-800">{hero.title}</h2>
-            <p className="text-slate-500 text-sm mt-1">{hero.desc}</p>
-            <p className="text-xs text-slate-400 mt-3">
-              Commande <span className="font-semibold text-slate-600">#{order.orderNumber}</span>
+            <h2 className="text-xl font-bold text-stone-800">{hero.title}</h2>
+            <p className="text-stone-500 text-sm mt-1">{hero.desc}</p>
+            <p className="text-xs text-stone-400 mt-3">
+              Commande <span className="font-semibold text-stone-600">#{order.orderNumber}</span>
               {' · '}
               {formatDateTime(order.createdAt)}
             </p>
           </div>
 
-          {/* Frise de progression */}
+          {/* ── Frise de progression avec petite voiture ── */}
           {!isCancelled && !isDraft && (
-            <div className="bg-white rounded-2xl border border-blue-100 p-6 overflow-x-auto">
+            <div className="bg-white rounded-2xl border border-stone-100 p-6 overflow-x-auto">
               <div className="relative min-w-[520px] sm:min-w-0 pt-6">
+                {/* Ligne de fond */}
                 <div className="absolute top-[38px] left-[5%] right-[5%] h-1.5 bg-stone-100 rounded-full" />
+                {/* Ligne de progression */}
                 <div
-                  className="absolute top-[38px] left-[5%] h-1.5 bg-blue-600 rounded-full transition-all duration-700"
+                  className="absolute top-[38px] left-[5%] h-1.5 bg-rose-400 rounded-full transition-all duration-700"
                   style={{ width: `${progressPercent * 0.9}%` }}
                 />
+                {/* Petite voiture qui roule 🚗 */}
                 <div
                   className="absolute top-[14px] text-2xl transition-all duration-700"
                   style={{
@@ -175,6 +197,7 @@ export default function Track() {
                   🚗
                 </div>
 
+                {/* Étapes */}
                 <div className="relative flex justify-between px-[5%]">
                   {STEPS.map((step, i) => {
                     const done = i <= currentStepIndex;
@@ -183,7 +206,7 @@ export default function Track() {
                         <div
                           className={`w-9 h-9 rounded-full flex items-center justify-center text-base border-2 transition-colors ${
                             done
-                              ? 'bg-blue-600 border-blue-600 text-white'
+                              ? 'bg-rose-500 border-rose-500 text-white'
                               : 'bg-white border-stone-200 text-stone-300'
                           }`}
                         >
@@ -191,7 +214,7 @@ export default function Track() {
                         </div>
                         <span
                           className={`text-[11px] text-center font-medium leading-tight ${
-                            done ? 'text-blue-600' : 'text-slate-400'
+                            done ? 'text-rose-500' : 'text-stone-400'
                           }`}
                         >
                           {step.short}
@@ -214,10 +237,10 @@ export default function Track() {
             </div>
           )}
 
-          {/* Historique détaillé */}
+          {/* ── Historique détaillé ── */}
           {order.tracking?.length > 0 && (
-            <div className="bg-white rounded-2xl border border-blue-100 p-5">
-              <h3 className="text-sm font-semibold text-slate-700 mb-4">Historique</h3>
+            <div className="bg-white rounded-2xl border border-stone-100 p-5">
+              <h3 className="text-sm font-semibold text-stone-700 mb-4">Historique</h3>
               <div className="space-y-1">
                 {[...order.tracking].reverse().map((track, i, arr) => {
                   const stepInfo = STEPS.find((s) => s.key === track.status);
@@ -226,7 +249,7 @@ export default function Track() {
                       <div className="flex flex-col items-center">
                         <div
                           className={`w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 ${
-                            i === 0 ? 'bg-blue-600 text-white' : 'bg-stone-100 text-stone-400'
+                            i === 0 ? 'bg-rose-500 text-white' : 'bg-stone-100 text-stone-400'
                           }`}
                         >
                           {stepInfo?.emoji || (track.status === 'CANCELLED' ? '❌' : '•')}
@@ -234,13 +257,13 @@ export default function Track() {
                         {i < arr.length - 1 && <div className="w-px h-6 bg-stone-100 my-1" />}
                       </div>
                       <div className="pb-3">
-                        <p className="text-sm font-semibold text-slate-800">
+                        <p className="text-sm font-semibold text-stone-800">
                           {stepInfo?.label || track.status}
                         </p>
                         {track.message && (
-                          <p className="text-xs text-slate-400 mt-0.5">{track.message}</p>
+                          <p className="text-xs text-stone-400 mt-0.5">{track.message}</p>
                         )}
-                        <p className="text-xs text-slate-300 mt-0.5">
+                        <p className="text-xs text-stone-300 mt-0.5">
                           {formatDateTime(track.createdAt)}
                         </p>
                       </div>
@@ -251,59 +274,59 @@ export default function Track() {
             </div>
           )}
 
-          {/* Articles */}
-          <div className="bg-white rounded-2xl border border-blue-100 p-5">
-            <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-1.5">
-              <Package size={15} className="text-blue-600" /> Articles
+          {/* ── Articles ── */}
+          <div className="bg-white rounded-2xl border border-stone-100 p-5">
+            <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-1.5">
+              <Package size={15} className="text-rose-400" /> Articles
             </h3>
             <div className="space-y-1">
               {order.items?.map((item) => (
                 <div key={item.id} className="flex justify-between items-center py-2 border-b border-stone-50 last:border-0 text-sm">
                   <div className="min-w-0">
-                    <p className="font-medium text-slate-800 truncate">{item.productName}</p>
-                    {item.variantLabel && <p className="text-xs text-slate-400">{item.variantLabel}</p>}
-                    <p className="text-xs text-slate-400">x{item.quantity}</p>
+                    <p className="font-medium text-stone-800 truncate">{item.productName}</p>
+                    {item.variantLabel && <p className="text-xs text-stone-400">{item.variantLabel}</p>}
+                    <p className="text-xs text-stone-400">x{item.quantity}</p>
                   </div>
-                  <span className="font-semibold text-slate-800 shrink-0">
+                  <span className="font-semibold text-stone-800 shrink-0">
                     {formatPrice(item.subtotal)}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between font-bold text-slate-900 pt-3 mt-2 border-t border-stone-100 text-sm">
+            <div className="flex justify-between font-bold text-stone-900 pt-3 mt-2 border-t border-stone-100 text-sm">
               <span>Total</span>
               <span>{formatPrice(order.total)}</span>
             </div>
           </div>
 
-          {/* Adresse & Paiement */}
+          {/* ── Adresse & Paiement ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-blue-100 p-5">
-              <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-1.5 mb-2">
-                <MapPin size={14} className="text-blue-600" /> Livraison
+            <div className="bg-white rounded-2xl border border-stone-100 p-5">
+              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5 mb-2">
+                <MapPin size={14} className="text-rose-400" /> Livraison
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-stone-500">
                 {order.shippingAddress?.city}, {order.shippingAddress?.country}
               </p>
             </div>
-            <div className="bg-white rounded-2xl border border-blue-100 p-5">
-              <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-1.5 mb-2">
-                <CreditCard size={14} className="text-blue-600" /> Paiement
+            <div className="bg-white rounded-2xl border border-stone-100 p-5">
+              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5 mb-2">
+                <CreditCard size={14} className="text-rose-400" /> Paiement
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-stone-500">
                 {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-4 text-xs text-slate-400 py-2">
+          <div className="flex items-center justify-center gap-4 text-xs text-stone-400 py-2">
             <span className="flex items-center gap-1"><ShieldCheck size={12} /> Suivi sécurisé</span>
           </div>
 
           <button
             type="button"
             onClick={() => { setActiveSearch(null); setSearch(''); navigate('/suivi'); }}
-            className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-2"
+            className="w-full text-center text-sm text-rose-500 hover:text-rose-600 font-medium py-2"
           >
             Suivre une autre commande
           </button>

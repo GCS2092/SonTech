@@ -2,14 +2,16 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, ShoppingBag, Search, Package, User } from 'lucide-react';
 import useCartStore from '../../store/cartStore';
 import useAuthStore from '../../store/authStore';
+import useUiStore from '../../store/uiStore';
 
 export default function BottomNav() {
   const { isAuthenticated } = useAuthStore();
   const { getTotalItems } = useCartStore();
+  const { mobileMenuOpen } = useUiStore();
   const location = useLocation();
 
-  // Masquer sur checkout
-  const hidden = ['/checkout'].includes(location.pathname);
+  // Masquer sur checkout OU quand le menu hamburger mobile est ouvert
+  const hidden = ['/checkout'].includes(location.pathname) || mobileMenuOpen;
   if (hidden) return null;
 
   const navItems = [

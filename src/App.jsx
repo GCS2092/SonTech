@@ -21,6 +21,7 @@ import About from './pages/shop/About';
 import Contact from './pages/shop/Contact';
 import CGV from './pages/shop/CGV';
 import Returns from './pages/shop/Returns';
+import Track from './pages/shop/Track';
 import Cart from './pages/cart/Cart';
 import Checkout from './pages/cart/Checkout';
 import Orders from './pages/orders/Orders';
@@ -75,6 +76,8 @@ export default function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/cgv" element={<CGV />} />
               <Route path="/returns" element={<Returns />} />
+              <Route path="/suivi" element={<Track />} />
+              <Route path="/suivi/:orderNumber" element={<Track />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
 

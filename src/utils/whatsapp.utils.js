@@ -46,7 +46,7 @@ export function buildOrderConfirmationWhatsAppLink(order) {
     `Votre commande n°${order.orderNumber} a bien été enregistrée.`,
     `Total : ${formatPrice(order.total)}`,
     '',
-    `Suivez votre commande ici : ${CLIENT_URL}/orders/${order.orderNumber}`,
+    `Suivez votre commande ici : ${CLIENT_URL}/suivi/${order.orderNumber}`,
     '',
     'Merci pour votre confiance ! 🙏',
   ];
@@ -64,7 +64,7 @@ export function buildOrderStatusWhatsAppLink(order, overrideStatus = null) {
     `Votre commande n°${order.orderNumber} ${statusText}.`,
     '',
     `Total : ${formatPrice(order.total)}`,
-    `Détails : ${CLIENT_URL}/orders/${order.orderNumber}`,
+    `Détails : ${CLIENT_URL}/suivi/${order.orderNumber}`,
   ];
   return buildWaLink(phone, lines.join('\n'));
 }
