@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom';
+﻿import { Link, NavLink } from 'react-router-dom';
 import { ShoppingBag, Heart, Bell, User, Menu, X, Tag, Truck } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import useAuthStore from '../../store/authStore';
@@ -124,14 +124,14 @@ export default function Navbar() {
               <Truck size={13} /> Suivi
             </Link>
 
-            {/* Lien SonTech — desktop uniquement */}
+            {/* Lien Urban Beauty — desktop uniquement */}
             <a
               href={isAuthenticated && token ? `https://urban-beauty.vercel.app?token=${token}` : "https://urban-beauty.vercel.app"}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-medium transition-colors mr-1"
             >
-              🔌 SonTech
+              🔌 Urban Beauty
             </a>
 
             {/* Panier — desktop uniquement */}
@@ -275,14 +275,14 @@ export default function Navbar() {
               Suivre ma commande
             </Link>
 
-            {/* Lien SonTech — mobile */}
+            {/* Lien Urban Beauty — mobile */}
             <a
               href={isAuthenticated && token ? `https://urban-beauty.vercel.app?token=${token}` : "https://urban-beauty.vercel.app"}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium px-3 py-2.5 rounded-xl text-blue-500 hover:bg-blue-50 transition-colors"
             >
-              🔌 Découvrir SonTech
+              🔌 Découvrir Urban Beauty
             </a>
 
             {isAuthenticated && (
@@ -341,3 +341,5 @@ export default function Navbar() {
     </header>
   );
 }
+
+
