@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { Cpu, Truck } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-400 mt-auto border-t-2 border-blue-500/20">
+    <footer className="bg-slate-900 text-slate-400 mt-auto border-t-2 border-blue-500/20 pb-20 md:pb-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
 
@@ -19,7 +19,7 @@ export default function Footer() {
             </div>
 
             <p className="text-sm leading-relaxed">
-              Smartphones, ordinateurs et accessoires tech. Produits garantis, livrés partout au Sénégal.
+              Smartphones, ordinateurs et accessoires tech. Produits garantis, livres partout au Senegal.
             </p>
 
             <Link
@@ -35,7 +35,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 mt-3 text-xs text-rose-400 hover:text-rose-300 transition-colors font-medium"
             >
-              👗 Découvrir SonShop
+              Decouvrir SonShop
             </a>
           </div>
 
@@ -73,19 +73,20 @@ export default function Footer() {
               Informations
             </h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/about" className="hover:text-white transition-colors">À propos</Link></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">A propos</Link></li>
               <li><Link to="/contact" className="hover:text-white transition-colors">Nous contacter</Link></li>
               <li><Link to="/returns" className="hover:text-white transition-colors">Politique de retour</Link></li>
-              <li><Link to="/cgv" className="hover:text-white transition-colors">Conditions générales de vente</Link></li>
+              <li><Link to="/cgv" className="hover:text-white transition-colors">Conditions generales de vente</Link></li>
             </ul>
           </div>
 
         </div>
 
         <div className="border-t border-slate-800 pt-6 text-xs text-center">
-          © {new Date().getFullYear()} SonTech — Tous droits réservés
+          {new Date().getFullYear()} SonTech - Tous droits reserves
         </div>
       </div>
     </footer>
   );
 }
+
