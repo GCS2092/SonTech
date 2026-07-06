@@ -126,7 +126,7 @@ export default function Navbar() {
 
             {/* Lien SonTech — desktop uniquement */}
             <a
-              href={isAuthenticated && token ? `https://son-tech.vercel.app?token=${token}` : "https://son-tech.vercel.app"}
+              href={isAuthenticated && token ? `https://urban-beauty.vercel.app?token=${token}` : "https://urban-beauty.vercel.app"}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-medium transition-colors mr-1"
@@ -277,7 +277,7 @@ export default function Navbar() {
 
             {/* Lien SonTech — mobile */}
             <a
-              href={isAuthenticated && token ? `https://son-tech.vercel.app?token=${token}` : "https://son-tech.vercel.app"}
+              href={isAuthenticated && token ? `https://urban-beauty.vercel.app?token=${token}` : "https://urban-beauty.vercel.app"}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium px-3 py-2.5 rounded-xl text-blue-500 hover:bg-blue-50 transition-colors"

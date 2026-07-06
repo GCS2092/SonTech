@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search, MapPin, CreditCard, Package, ChevronLeft,
-  ShieldCheck, MessageCircle,
+  ShieldCheck, MessageCircle, Copy, Check, WifiOff,
 } from 'lucide-react';
 import { ordersApi } from '../../api/orders.api';
 import { formatPrice } from '../../utils/formatPrice';
@@ -22,6 +22,16 @@ const STEPS = [
   { key: 'SHIPPED', label: 'En livraison', short: 'Livraison', emoji: '🚚' },
   { key: 'DELIVERED', label: 'Livrée', short: 'Livrée', emoji: '🎉' },
 ];
+
+// Icône du véhicule affichée sur la frise selon l'étape courante :
+// le colis "raconte" son propre trajet plutôt que d'afficher toujours la même voiture.
+const JOURNEY_ICONS = {
+  PENDING: '🕐',
+  CONFIRMED: '📋',
+  PROCESSING: '📦',
+  SHIPPED: '🚚',
+  DELIVERED: '🎉',
+};
 
 const HERO_TEXT = {
   DRAFT: { emoji: '📝', title: 'Commande en brouillon', desc: 'En attente de confirmation via WhatsApp.' },
@@ -42,6 +52,7 @@ export default function Track() {
 
   const [search, setSearch] = useState(initialOrderNumber);
   const [activeSearch, setActiveSearch] = useState(paramOrderNumber || null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (paramOrderNumber) {
@@ -50,7 +61,7 @@ export default function Track() {
     }
   }, [paramOrderNumber]);
 
-  const { data: order, isLoading, isError, isFetching } = useQuery({
+  const { data: order, isLoading, isError, isFetching, error, refetch } = useQuery({
     queryKey: ['track-order', activeSearch],
     queryFn: () => ordersApi.getByNumber(activeSearch).then((r) => r.data),
     enabled: !!activeSearch,
@@ -71,6 +82,13 @@ export default function Track() {
     navigate(`/suivi/${clean}`, { replace: true });
   };
 
+  const handleCopyOrderNumber = () => {
+    if (!order?.orderNumber) return;
+    navigator.clipboard.writeText(order.orderNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   const currentStepIndex = order
     ? STEPS.findIndex((s) => s.key === order.status)
     : -1;
@@ -80,6 +98,11 @@ export default function Track() {
 
   const progressPercent =
     currentStepIndex >= 0 ? (currentStepIndex / (STEPS.length - 1)) * 100 : 0;
+
+  // L'intercepteur axios (api/axios.js) rejette un objet { status, message, raw }.
+  // status === 404 → numéro inexistant (erreur du client).
+  // status undefined/5xx → panne réseau ou serveur (erreur transitoire, pas la faute du client).
+  const isNotFoundError = error?.status === 404;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -148,13 +171,35 @@ export default function Track() {
         </div>
       )}
 
+      {/* États d'erreur différenciés : numéro invalide vs panne réseau/serveur */}
       {activeSearch && !isLoading && (isError || !order) && (
         <div className="text-center py-16 space-y-3 fade-up">
-          <p className="text-4xl">🔍</p>
-          <p className="text-stone-600 font-medium">Commande introuvable</p>
-          <p className="text-stone-400 text-sm">
-            Vérifiez le numéro saisi ou contactez-nous si le problème persiste.
-          </p>
+          {isNotFoundError ? (
+            <>
+              <p className="text-4xl">🔍</p>
+              <p className="text-stone-600 font-medium">Commande introuvable</p>
+              <p className="text-stone-400 text-sm max-w-xs mx-auto">
+                Vérifiez le numéro saisi ou contactez-nous si le problème persiste.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-50 text-amber-500">
+                <WifiOff size={24} />
+              </div>
+              <p className="text-stone-600 font-medium">Connexion impossible</p>
+              <p className="text-stone-400 text-sm max-w-xs mx-auto">
+                Un problème réseau nous empêche de récupérer votre commande. Réessayez dans un instant.
+              </p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="inline-block text-sm text-rose-500 hover:text-rose-600 font-medium mt-1 focus-visible:outline-2 focus-visible:outline-rose-400 rounded"
+              >
+                Réessayer
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -171,7 +216,7 @@ export default function Track() {
           >
             <div className="relative inline-block mb-3">
               {!isCancelled && (
-                <span className="absolute inset-0 -m-2 rounded-full bg-rose-200/40 blur-xl" />
+                <span className="absolute inset-0 -m-2 rounded-full bg-rose-200/40 blur-xl animate-pulse" />
               )}
               <div
                 className="relative text-6xl inline-block"
@@ -182,11 +227,25 @@ export default function Track() {
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-stone-800">{hero.title}</h2>
             <p className="text-stone-500 text-sm mt-1 max-w-sm mx-auto">{hero.desc}</p>
-            <div className="inline-flex items-center gap-2 text-xs text-stone-400 mt-4 bg-white/70 border border-stone-100 rounded-full px-3 py-1.5">
+
+            <button
+              type="button"
+              onClick={handleCopyOrderNumber}
+              title="Copier le numéro de commande"
+              className="inline-flex items-center gap-2 text-xs text-stone-400 mt-4 bg-white/70 border border-stone-100 rounded-full px-3 py-1.5 hover:border-rose-200 hover:text-stone-500 transition-colors focus-visible:outline-2 focus-visible:outline-rose-400"
+            >
               <span className="font-semibold text-stone-600">#{order.orderNumber}</span>
               <span className="w-1 h-1 rounded-full bg-stone-300" />
               {formatDateTime(order.createdAt)}
-            </div>
+              <span className="w-1 h-1 rounded-full bg-stone-300" />
+              {copied ? (
+                <span className="inline-flex items-center gap-1 text-rose-500 font-medium">
+                  <Check size={11} /> Copié
+                </span>
+              ) : (
+                <Copy size={11} className="text-stone-300" />
+              )}
+            </button>
           </div>
 
           {/* ── La route (frise de progression) ── */}
@@ -205,7 +264,7 @@ export default function Track() {
                   style={{ width: `${progressPercent}%` }}
                   aria-hidden="true"
                 />
-                {/* Voiture */}
+                {/* Icône mobile : change selon l'étape pour raconter le trajet du colis */}
                 <div
                   className="absolute top-0 sm:top-[-2px] text-xl sm:text-2xl transition-all duration-700 drop-shadow"
                   style={{
@@ -214,7 +273,7 @@ export default function Track() {
                   }}
                   aria-hidden="true"
                 >
-                  🚗
+                  {JOURNEY_ICONS[order.status] || '🚗'}
                 </div>
 
                 {/* Étapes */}
@@ -222,20 +281,27 @@ export default function Track() {
                   {STEPS.map((step) => {
                     const stepIdx = STEPS.findIndex((s) => s.key === step.key);
                     const done = stepIdx <= currentStepIndex;
+                    const isCurrent = stepIdx === currentStepIndex;
                     return (
                       <div key={step.key} className="flex flex-col items-center gap-1.5 w-8 sm:w-16">
                         <div
-                          className={`w-3.5 h-3.5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-sm border-2 transition-colors ${
-                            done
-                              ? 'bg-rose-500 border-rose-500 text-white'
-                              : 'bg-white border-stone-200 text-stone-300'
+                          className={`rounded-full flex items-center justify-center border-2 transition-all ${
+                            isCurrent
+                              ? 'w-4 h-4 sm:w-8 sm:h-8 bg-rose-500 border-rose-500 text-white text-[10px] sm:text-sm'
+                              : done
+                              ? 'w-3.5 h-3.5 sm:w-8 sm:h-8 bg-rose-500 border-rose-500 text-white text-[10px] sm:text-sm'
+                              : 'w-2 h-2 sm:w-8 sm:h-8 bg-stone-200 border-stone-200 sm:bg-white sm:border-stone-200 text-stone-300 text-[10px] sm:text-sm'
                           }`}
                         >
                           <span className="hidden sm:inline">{step.emoji}</span>
                         </div>
                         <span
-                          className={`hidden sm:block text-[10px] text-center font-medium leading-tight ${
-                            done ? 'text-rose-500' : 'text-stone-400'
+                          className={`text-[10px] text-center font-medium leading-tight ${
+                            isCurrent
+                              ? 'block text-rose-500'
+                              : done
+                              ? 'hidden sm:block text-rose-500'
+                              : 'hidden sm:block text-stone-400'
                           }`}
                         >
                           {step.short}
@@ -260,7 +326,7 @@ export default function Track() {
 
           {/* ── Historique détaillé ── */}
           {order.tracking?.length > 0 && (
-            <div className="fade-up bg-white rounded-3xl border border-stone-100 shadow-sm p-5 sm:p-6">
+            <div className="fade-up bg-white rounded-2xl border-t-2 border-stone-100 p-5 sm:p-6">
               <h3 className="text-sm font-semibold text-stone-700 mb-4">Historique</h3>
               <div className="space-y-1">
                 {[...order.tracking].reverse().map((track, i, arr) => {
@@ -296,7 +362,7 @@ export default function Track() {
           )}
 
           {/* ── Articles ── */}
-          <div className="fade-up bg-white rounded-3xl border border-stone-100 shadow-sm p-5 sm:p-6">
+          <div className="fade-up bg-white rounded-2xl border-t-2 border-stone-100 p-5 sm:p-6">
             <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-1.5">
               <Package size={15} className="text-rose-400" /> Articles
             </h3>
@@ -320,23 +386,28 @@ export default function Track() {
             </div>
           </div>
 
-          {/* ── Adresse & Paiement ── */}
-          <div className="fade-up grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div className="bg-white rounded-3xl border border-stone-100 shadow-sm p-5">
-              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5 mb-2">
-                <MapPin size={14} className="text-rose-400" /> Livraison
-              </h3>
-              <p className="text-sm text-stone-500">
-                {order.shippingAddress?.city}, {order.shippingAddress?.country}
-              </p>
-            </div>
-            <div className="bg-white rounded-3xl border border-stone-100 shadow-sm p-5">
-              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5 mb-2">
-                <CreditCard size={14} className="text-rose-400" /> Paiement
-              </h3>
-              <p className="text-sm text-stone-500">
-                {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
-              </p>
+          {/* ── Récapitulatif : Livraison & Paiement fusionnés ── */}
+          <div className="fade-up bg-white rounded-2xl border-t-2 border-stone-100 p-5 sm:p-6">
+            <h3 className="text-sm font-semibold text-stone-700 mb-4">Récapitulatif</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="flex items-start gap-2.5">
+                <MapPin size={15} className="text-rose-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-stone-400 mb-0.5">Livraison</p>
+                  <p className="text-sm text-stone-700">
+                    {order.shippingAddress?.city}, {order.shippingAddress?.country}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5 sm:border-l sm:border-stone-100 sm:pl-6">
+                <CreditCard size={15} className="text-rose-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-stone-400 mb-0.5">Paiement</p>
+                  <p className="text-sm text-stone-700">
+                    {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
